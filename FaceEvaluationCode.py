@@ -28,6 +28,16 @@ def resize(image, width=1200):
     resized = cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
     return resized
 
+def InGtBox(box, boxes):
+    cx = (boxes[0] + boxes[2])/2
+    cy = (boxes[1] + boxes[3])/2
+       
+    if cx > box[0] and cx < box[2] and cy > box[1] and cy < box[3]:
+        print('yes')
+        return 1
+    print('oh, no')
+    return 0    
+    
 def IoU(box, boxes):
     box_area = (box[2] - box[0] + 1) * (box[3] - box[1] + 1)
     area = (boxes[2] - boxes[0] + 1) * (boxes[3] - boxes[1] + 1)
@@ -49,6 +59,7 @@ file_path="test_result.txt"
 f=open(file_path, "w")
 num = 0
 iou = 0 
+num_in_gt = 0
 fzz = open('bbresult2.txt') # load the groundtruth here
 lines = fzz.readline().split(' ')
 print('/home/zz/CENG5050FaceDetectionEvaluation/Temp3_12Final/' + lines[0])
@@ -89,6 +100,7 @@ while lines:
 
        #compute the iou
        iou += IoU(gt, rect_pre)
+       num_in_gt += InGtBox(gt, rect_pre)
        num += 1
        #debug
        print('num')
@@ -96,8 +108,8 @@ while lines:
        print('IoU sum')
        print(iou)
        print(IoU(gt, rect_pre))
-       
-
+       print('len(rects)')
+       print(len(rects))
        (x, y, w, h) = rect_to_bb(rect)
        cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
@@ -108,10 +120,10 @@ while lines:
     lines = fzz.readline().split(' ')
     # save the result img with predicted bounding box
     #cv2.imshow("Output", image)
-    #cv2.imsave(".jpg", image)
+    #cv2.imsave('/home/zz/CENG5050FaceDetectionEvaluation/FaceDetectModelEvaluateIOU/FaceDetectModelEvaluateIOU/Temp3_12Final_Part2/' + lines[0] + ".jpg", image)
     cv2.waitKey(0)
 
 print('avg iou')
-print(iou/num)
-f.write(str(iou/num))
+print(num_in_gt/num)
+f.write(str(num_in_gt/num))
 
